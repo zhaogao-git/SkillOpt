@@ -54,6 +54,7 @@ nav:
     - Results: sleep/RESULTS.md
   - Extension Guides:
     - Add a New Benchmark: guide/new-benchmark.md
+    - Worker Bundle POC: guide/worker-bundle.md
     - Local Environment Smoke Tests: guide/local-env-smoke.md
     - Add a New Model Backend: guide/new-backend.md
   - Reference:

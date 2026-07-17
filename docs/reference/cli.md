@@ -91,6 +91,20 @@ python scripts/train.py \
     model.target=deepseek-chat
 ```
 
+For an isolated, tool-free GitHub Copilot CLI optimizer:
+
+```bash
+python scripts/train.py \
+  --config configs/worker_bundle/template.yaml \
+  --cfg-options \
+    model.optimizer_backend=copilot_cli \
+    model.optimizer=gpt-5.4
+```
+
+Replace the template paths locally and configure the external worker runner
+before executing it. The backend disables built-in MCPs, custom instructions,
+and tools.
+
 ## SkillOpt-Sleep
 
 ```bash

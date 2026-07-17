@@ -96,6 +96,30 @@ Responses API features are outside this backend's contract.
 Only write a new backend when the provider is not compatible with this surface
 or requires behavior that cannot be expressed by its configuration.
 
+## Built-in: tool-free GitHub Copilot CLI
+
+Use `copilot_cli` when an installed, authenticated GitHub Copilot CLI should
+serve as the optimizer or a plain chat target. It invokes `copilot --prompt`
+through a subprocess argument array and fixes the model, reasoning effort,
+context tier, isolated `COPILOT_HOME`, cwd, and timeout from configuration.
+
+The integration disables built-in MCPs and custom instructions, advertises no
+tools, denies/excludes all tools, and rejects both tool-bearing inputs and tool
+events from the CLI. It records successful call counts; token counts remain
+zero because this JSONL contract does not expose them.
+
+```yaml
+model:
+  optimizer_backend: copilot_cli
+  optimizer: gpt-5.4
+  copilot_cli_path: copilot
+  copilot_cli_reasoning_effort: medium
+  copilot_cli_context: default
+  copilot_cli_home: .skillopt/copilot-home
+  copilot_cli_cwd: .
+  copilot_cli_timeout_seconds: 240
+```
+
 ## Backend architecture
 
 The active split optimizer/target dispatcher is the public

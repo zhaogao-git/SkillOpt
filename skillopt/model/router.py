@@ -4,9 +4,8 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from . import azure_openai, claude_backend, codex_backend
+from . import azure_openai, claude_backend, codex_backend, copilot_cli_backend
 from .common import normalize_backend_name
-
 
 _ACTIVE_BACKEND = normalize_backend_name(
     os.environ.get("REFLACT_MODEL_BACKEND", "azure_openai")
@@ -20,19 +19,21 @@ def _backend_module(name: str):
         return codex_backend
     if name == "claude":
         return claude_backend
+    if name == "copilot_cli":
+        return copilot_cli_backend
     raise ValueError(f"Unknown backend: {name!r}")
 
 
 def _all_backend_modules() -> list[Any]:
-    return [azure_openai, codex_backend, claude_backend]
+    return [azure_openai, codex_backend, claude_backend, copilot_cli_backend]
 
 
 def set_backend(name: str | None) -> str:
     """Select the active model backend for subsequent calls."""
     global _ACTIVE_BACKEND
     normalized = normalize_backend_name(name)
-    if normalized not in {"azure_openai", "codex", "claude"}:
-        valid = ", ".join(sorted({"azure_openai", "codex", "claude"}))
+    if normalized not in {"azure_openai", "codex", "claude", "copilot_cli"}:
+        valid = ", ".join(sorted({"azure_openai", "codex", "claude", "copilot_cli"}))
         raise ValueError(f"Unknown backend {name!r}. Expected one of: {valid}")
     _ACTIVE_BACKEND = normalized
     os.environ["REFLACT_MODEL_BACKEND"] = normalized

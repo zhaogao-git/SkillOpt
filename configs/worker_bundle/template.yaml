@@ -1,0 +1,58 @@
+_base_: ../_base_/default.yaml
+
+# Generic local Worker Bundle POC template. Replace placeholder paths locally.
+model:
+  backend: copilot_cli
+  optimizer_backend: copilot_cli
+  target_backend: copilot_cli
+  optimizer: gpt-5.4
+  target: gpt-5.4
+  reasoning_effort: medium
+  copilot_cli_reasoning_effort: medium
+  copilot_cli_context: default
+  copilot_cli_home: .skillopt/copilot-home
+  copilot_cli_cwd: .
+  copilot_cli_timeout_seconds: 240
+
+train:
+  num_epochs: 1
+  batch_size: 4
+  accumulation: 1
+
+gradient:
+  minibatch_size: 4
+  merge_batch_size: 4
+  analyst_workers: 1
+
+optimizer:
+  learning_rate: 2
+  min_learning_rate: 1
+  lr_scheduler: constant
+  skill_update_mode: patch
+  use_slow_update: false
+  use_meta_skill: false
+  use_skill_aware_reflection: false
+
+evaluation:
+  use_gate: true
+  sel_env_num: 0
+  test_env_num: 0
+  eval_test: false
+  use_semantic_density: false
+
+env:
+  name: worker_bundle
+  skill_init: path/to/initial-virtual-worker-bundle.md
+  split_mode: split_dir
+  split_dir: path/to/pre-split-task-contracts
+  allow_test_split: false
+  bundle_manifest: path/to/worker-bundle-manifest.yaml
+  bundle_base_dir: path/to/baseline-worker-bundle
+  runner_path: ""
+  runner_env_var: WORKER_BUNDLE_RUNNER
+  runner_args: []
+  runner_timeout: 120
+  max_files_changed: 3
+  max_edit_operations: 8
+  max_added_tokens: 2000
+  max_removed_tokens: 2000

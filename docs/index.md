@@ -121,6 +121,7 @@ SkillOpt brings the familiar deep-learning training paradigm to agentic prompt o
 | **SearchQA** | Open-domain QA | `configs/searchqa/` |
 | **LiveMathematicianBench** | Math reasoning | `configs/livemathematicianbench/` |
 | **SpreadsheetBench** | Spreadsheet editing | `configs/spreadsheetbench/` |
+| **Worker Bundle** | External-runner multi-file instruction POC | `configs/worker_bundle/` |
 
 ---
 
@@ -128,10 +129,10 @@ SkillOpt brings the familiar deep-learning training paradigm to agentic prompt o
 
 Optimizer and target roles are configured separately. Chat backends include
 Azure OpenAI (`openai_chat`), the provider-neutral
-`openai_compatible` backend, the Claude Code CLI (`claude_chat`), Qwen, and
-MiniMax. Codex and Claude Code exec harnesses are target-only and require
-adapter support. Despite its name, `claude_chat` launches `claude -p`; it is
-not a direct Anthropic API client.
+`openai_compatible` backend, the Claude Code CLI (`claude_chat`), Qwen,
+MiniMax, and the isolated tool-free GitHub Copilot CLI (`copilot_cli`). Codex
+and Claude Code exec harnesses require adapter support. Despite its name,
+`claude_chat` launches `claude -p`; it is not a direct Anthropic API client.
 
 If a provider implements OpenAI Chat Completions, begin with the
 [built-in compatible backend](guide/new-backend.md#built-in-the-generic-openai-compatible-backend)

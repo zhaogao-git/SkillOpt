@@ -63,6 +63,7 @@ from skillopt.model import (
     configure_azure_openai,
     configure_claude_code_exec,
     configure_codex_exec,
+    configure_copilot_cli,
     configure_minimax_chat,
     configure_qwen_chat,
     get_token_summary,
@@ -684,6 +685,9 @@ class ReflACTTrainer:
             elif backend in {"qwen", "qwen_chat"}:
                 optimizer_backend = optimizer_backend or "openai_chat"
                 target_backend = target_backend or "qwen_chat"
+            elif backend == "copilot_cli":
+                optimizer_backend = optimizer_backend or "copilot_cli"
+                target_backend = target_backend or "copilot_cli"
             else:
                 optimizer_backend = optimizer_backend or "openai_chat"
                 target_backend = target_backend or "openai_chat"
@@ -748,6 +752,18 @@ class ReflACTTrainer:
         )
         reasoning = cfg.get("reasoning_effort", "") or None
         set_reasoning_effort(reasoning)
+        configure_copilot_cli(
+            path=cfg.get("copilot_cli_path", "copilot"),
+            reasoning_effort=cfg.get(
+                "copilot_cli_reasoning_effort",
+                cfg.get("reasoning_effort", "medium"),
+            ),
+            context=cfg.get("copilot_cli_context", "default"),
+            copilot_home=cfg.get("copilot_cli_home")
+            or os.path.join(os.path.expanduser("~"), ".skillopt", "copilot-cli"),
+            cwd=cfg.get("copilot_cli_cwd") or os.getcwd(),
+            timeout_seconds=cfg.get("copilot_cli_timeout_seconds", 240),
+        )
         print(
             f"  [model config] backend={backend}  "
             f"optimizer={cfg['optimizer_model']} ({optimizer_backend})  "
@@ -2073,6 +2089,9 @@ class ReflACTTrainer:
         with open(os.path.join(out_root, "best_skill.md"), "w") as f:
             f.write(best_skill)
         _persist_runtime_state(global_step)
+        export_best_bundle = getattr(adapter, "export_best_bundle", None)
+        if callable(export_best_bundle):
+            export_best_bundle(best_skill, out_root)
         print(
             f"\n  [done] best skill from step {best_step}, "
             f"score={best_score:.4f}"
@@ -2146,6 +2165,8 @@ class ReflACTTrainer:
                         with open(os.path.join(out_root, "best_skill.md"), "w") as f:
                             f.write(best_skill)
                         _persist_runtime_state(global_step)
+                        if callable(export_best_bundle):
+                            export_best_bundle(best_skill, out_root)
             except Exception as _e:  # noqa: BLE001
                 final_selection_hard = None
                 final_selection_soft = None

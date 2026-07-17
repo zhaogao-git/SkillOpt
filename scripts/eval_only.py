@@ -28,6 +28,7 @@ from skillopt.model import (
     configure_azure_openai,
     configure_claude_code_exec,
     configure_codex_exec,
+    configure_copilot_cli,
     configure_qwen_chat,
     configure_minimax_chat,
     set_reasoning_effort,
@@ -94,6 +95,11 @@ def _register_builtins() -> None:
     except ImportError:
         pass
     try:
+        from skillopt.envs.worker_bundle.adapter import WorkerBundleAdapter
+        _ENV_REGISTRY["worker_bundle"] = WorkerBundleAdapter
+    except ImportError:
+        pass
+    try:
         from skillopt.envs.sealqa.adapter import SealQAAdapter
         _ENV_REGISTRY["sealqa"] = SealQAAdapter
     except ImportError:
@@ -139,7 +145,7 @@ def parse_args() -> argparse.Namespace:
     # Legacy flat overrides
     p.add_argument("--env", type=str)
     p.add_argument("--backend", type=str,
-                   choices=["azure_openai", "codex", "codex_exec", "claude", "claude_chat", "claude_code_exec", "minimax", "minimax_chat"])
+                   choices=["azure_openai", "codex", "codex_exec", "claude", "claude_chat", "claude_code_exec", "minimax", "minimax_chat", "copilot", "copilot_cli"])
     p.add_argument("--optimizer_model", type=str)
     p.add_argument("--target_model", type=str)
     p.add_argument("--optimizer_backend", type=str)
@@ -181,6 +187,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--claude_code_exec_use_sdk", type=str)
     p.add_argument("--claude_code_exec_effort", type=str)
     p.add_argument("--claude_code_exec_max_thinking_tokens", type=int)
+    p.add_argument("--copilot_cli_path", type=str)
+    p.add_argument("--copilot_cli_reasoning_effort", type=str)
+    p.add_argument("--copilot_cli_context", type=str)
+    p.add_argument("--copilot_cli_home", type=str)
+    p.add_argument("--copilot_cli_cwd", type=str)
+    p.add_argument("--copilot_cli_timeout_seconds", type=int)
     p.add_argument("--minimax_base_url", type=str)
     p.add_argument("--minimax_api_key", type=str)
     p.add_argument("--minimax_model", type=str)
@@ -262,6 +274,12 @@ def main() -> None:
                 "claude_code_exec_use_sdk": "model.claude_code_exec_use_sdk",
                 "claude_code_exec_effort": "model.claude_code_exec_effort",
                 "claude_code_exec_max_thinking_tokens": "model.claude_code_exec_max_thinking_tokens",
+                "copilot_cli_path": "model.copilot_cli_path",
+                "copilot_cli_reasoning_effort": "model.copilot_cli_reasoning_effort",
+                "copilot_cli_context": "model.copilot_cli_context",
+                "copilot_cli_home": "model.copilot_cli_home",
+                "copilot_cli_cwd": "model.copilot_cli_cwd",
+                "copilot_cli_timeout_seconds": "model.copilot_cli_timeout_seconds",
                 "minimax_base_url": "model.minimax_base_url",
                 "minimax_api_key": "model.minimax_api_key",
                 "minimax_model": "model.minimax_model",
@@ -330,6 +348,9 @@ def main() -> None:
         elif backend in {"minimax", "minimax_chat"}:
             cfg.setdefault("optimizer_backend", "openai_chat")
             cfg.setdefault("target_backend", "minimax_chat")
+        elif backend == "copilot_cli":
+            cfg["optimizer_backend"] = "copilot_cli"
+            cfg["target_backend"] = "copilot_cli"
         else:
             cfg.setdefault("optimizer_backend", "openai_chat")
             cfg.setdefault("target_backend", "openai_chat")
@@ -343,6 +364,12 @@ def main() -> None:
             and not _has_model_override("model.optimizer", "optimizer_model")
         ):
             cfg["optimizer_model"] = default_model_for_backend("claude_chat")
+    if cfg.get("optimizer_backend") == "copilot_cli":
+        if (
+            str(cfg.get("optimizer_model", "") or "").strip() in _OPENAI_DEFAULT_MODEL_SENTINELS
+            and not _has_model_override("model.optimizer", "optimizer_model")
+        ):
+            cfg["optimizer_model"] = default_model_for_backend("copilot_cli")
     if cfg.get("target_backend") == "claude_chat":
         if (
             str(cfg.get("target_model", "") or "").strip() in _OPENAI_DEFAULT_MODEL_SENTINELS
@@ -364,6 +391,12 @@ def main() -> None:
                 cfg.get("minimax_model")
                 or default_model_for_backend("minimax_chat")
             )
+    if cfg.get("target_backend") == "copilot_cli":
+        if (
+            str(cfg.get("target_model", "") or "").strip() in _OPENAI_DEFAULT_MODEL_SENTINELS
+            and not _has_model_override("model.target", "target_model")
+        ):
+            cfg["target_model"] = default_model_for_backend("copilot_cli")
 
     if not cfg.get("out_root"):
         env = cfg.get("env", "unknown")
@@ -454,6 +487,14 @@ def main() -> None:
     if minimax_model_cfg and cfg.get("target_backend") == "minimax_chat":
         set_target_deployment(str(minimax_model_cfg))
     set_reasoning_effort(cfg.get("reasoning_effort", "") or None)
+    configure_copilot_cli(
+        path=cfg.get("copilot_cli_path", "copilot"),
+        reasoning_effort=cfg.get("copilot_cli_reasoning_effort", cfg.get("reasoning_effort", "medium")),
+        context=cfg.get("copilot_cli_context", "default"),
+        copilot_home=cfg.get("copilot_cli_home") or os.path.join(os.path.expanduser("~"), ".skillopt", "copilot-cli"),
+        cwd=cfg.get("copilot_cli_cwd") or os.getcwd(),
+        timeout_seconds=cfg.get("copilot_cli_timeout_seconds", 240),
+    )
 
     # Build adapter
     adapter = get_adapter(cfg)

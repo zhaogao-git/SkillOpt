@@ -190,9 +190,15 @@ not via a base class subclass. Supported values (as of this writing):
 | `qwen_chat` | ✓ | ✓ |
 | `minimax_chat` | ✓ | ✓ |
 | `openai_compatible` | ✓ | ✓ |
+| `copilot_cli` | ✓ | ✓ |
 | `codex_exec` | ✓ | ✓ |
 | `claude_code_exec` | — | ✓ |
 
 See `skillopt/model/backend_config.py` for the live whitelist and
 [`docs/reference/config.md`](./config.md) for the per-backend
 configuration keys.
+
+The optional virtual multi-file POC API lives in `skillopt.worker_bundle`.
+`build_manifest`, `serialize_bundle`, `parse_bundle`, `materialize_bundle`,
+`diff_bundles`, and `export_bundle_zip` preserve the trainer's existing string
+state while enforcing an immutable file allowlist and manifest.

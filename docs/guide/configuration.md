@@ -43,6 +43,7 @@ model:
 | `claude_chat` | ✓ | ✓ | Claude Code CLI (`claude -p`) |
 | `qwen_chat` | ✓ | ✓ | Qwen served through an OpenAI-compatible local endpoint |
 | `minimax_chat` | ✓ | ✓ | MiniMax API |
+| `copilot_cli` | ✓ | ✓ | Tool-free GitHub Copilot CLI subprocess |
 | `codex_exec` | — | ✓ | Codex CLI execution harness |
 | `claude_code_exec` | — | ✓ | Claude Code CLI execution harness |
 
@@ -187,6 +188,10 @@ Model credentials are loaded from environment variables:
 | `QWEN_CHAT_MODEL` | `qwen_chat` | Served model name for direct library use; train/eval YAML role models take precedence |
 | `MINIMAX_BASE_URL` | `minimax_chat` | MiniMax-compatible base URL |
 | `MINIMAX_API_KEY` | `minimax_chat` | MiniMax API key |
+| `COPILOT_CLI_PATH` | `copilot_cli` | Copilot executable; defaults to `copilot` |
+| `COPILOT_CLI_HOME` | `copilot_cli` | Isolated Copilot configuration directory |
+| `COPILOT_CLI_CWD` | `copilot_cli` | Fixed working directory |
+| `COPILOT_CLI_TIMEOUT_SECONDS` | `copilot_cli` | Per-call timeout |
 
 `OPTIMIZER_` and `TARGET_` prefixes provide per-role overrides for the
 Azure, OpenAI-compatible, and Qwen variable families. See the
@@ -196,6 +201,14 @@ Azure, OpenAI-compatible, and Qwen variable families. See the
 and authenticate that CLI before use. Setting `ANTHROPIC_API_KEY` is one way
 the CLI may authenticate, but SkillOpt does not call the Anthropic API
 directly through this backend.
+
+`copilot_cli` launches `copilot --prompt` with JSON output, built-in MCPs and
+custom instructions disabled, and all tools unavailable/denied. Configure
+`model.copilot_cli_reasoning_effort`, `model.copilot_cli_context`,
+`model.copilot_cli_home`, `model.copilot_cli_cwd`, and
+`model.copilot_cli_timeout_seconds`. The backend fails if a caller or model
+requests a tool. Copilot CLI does not currently report token counts through
+this integration, so SkillOpt records successful call counts with zero tokens.
 
 ### Three OpenAI-compatible paths
 

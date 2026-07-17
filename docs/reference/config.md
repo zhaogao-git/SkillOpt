@@ -16,6 +16,7 @@ selecting the generic OpenAI-compatible backend.
 | `claude_chat` | ✓ | ✓ |
 | `qwen_chat` | ✓ | ✓ |
 | `minimax_chat` | ✓ | ✓ |
+| `copilot_cli` | ✓ | ✓ |
 | `codex_exec` | ✓ | ✓ |
 | `claude_code_exec` | — | ✓ |
 
@@ -64,6 +65,7 @@ defaults to `claude` and can be overridden with `CLAUDE_CLI_BIN`.
 | `model.minimax_*` | MiniMax `base_url`, `api_key`, shared `minimax_model`, `temperature`, `max_tokens`, and `enable_thinking`; `minimax_model` applies when MiniMax is the target |
 | `model.codex_exec_*` | Codex path, sandbox, profile, SDK mode, reasoning, network/search, and approval policy |
 | `model.claude_code_exec_*` | Claude path, profile, SDK mode, effort, and thinking-token cap |
+| `model.copilot_cli_*` | Copilot path, reasoning effort, context tier, isolated `COPILOT_HOME`, fixed cwd, and timeout |
 
 ## Training (`train`)
 
@@ -135,6 +137,12 @@ defaults to `claude` and can be overridden with `CLAUDE_CLI_BIN`.
 
 Benchmark-specific `env` keys are passed through to the adapter.
 
+For `env.name: worker_bundle`, use `split_mode: split_dir` with YAML contracts
+under `train/`, `val/`, and `test/`. The adapter additionally accepts
+`bundle_manifest`, `bundle_base_dir`, `runner_path`, `runner_env_var`,
+`runner_args`, and `runner_timeout`; see the
+[Worker Bundle POC guide](../guide/worker-bundle.md).
+
 ## Credential Environment Variables
 
 ### Azure-family backend
@@ -169,6 +177,9 @@ variables; the environment model names mainly seed direct library use.
 
 Other backend families use the authenticated Claude CLI (`CLAUDE_CLI_BIN`;
 optionally `ANTHROPIC_API_KEY`), `QWEN_CHAT_*`, and `MINIMAX_*`.
+The tool-free Copilot backend uses `COPILOT_CLI_PATH`,
+`COPILOT_CLI_REASONING_EFFORT`, `COPILOT_CLI_CONTEXT`, `COPILOT_CLI_HOME`,
+`COPILOT_CLI_CWD`, and `COPILOT_CLI_TIMEOUT_SECONDS`.
 SkillOpt-Sleep's compatible endpoint uses `AZURE_OPENAI_*`, not the research
 backend's `OPENAI_COMPATIBLE_*`; see
 [the Sleep endpoint guide](../sleep/openai-compatible-endpoints.md).

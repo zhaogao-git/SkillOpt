@@ -65,7 +65,9 @@ https://github.com/user-attachments/assets/eb12d3bc-371c-467f-904d-91b61f339ed7
 
 A backend = a chat / exec target (e.g. `openai_chat`, `claude_chat`,
 `qwen_chat`, `minimax_chat`, `openai_compatible`, `codex_exec`,
-`claude_code_exec`). If a provider implements the OpenAI Chat Completions
+`claude_code_exec`, `copilot_cli`). The built-in `copilot_cli` backend is an
+isolated, tool-free GitHub Copilot CLI path for optimizer or chat-target calls.
+If a provider implements the OpenAI Chat Completions
 protocol, try the built-in `openai_compatible` backend before adding code. See
 [`docs/guide/new-backend.md`](docs/guide/new-backend.md) for the full
 contract; in short you add a `skillopt/model/<name>_backend.py` module,
@@ -80,6 +82,9 @@ a scored rollout helper, a YAML config, and optionally an initial seed skill.
 See
 [`docs/guide/new-benchmark.md`](docs/guide/new-benchmark.md) for the full
 contract; the simplest reference is `skillopt/envs/searchqa/`.
+For local multi-file instruction experiments, the generic `worker_bundle`
+adapter keeps the core trainable state as one canonical virtual document and
+delegates execution/scoring to an external runner.
 
 ### WebUI
 

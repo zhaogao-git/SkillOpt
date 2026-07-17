@@ -27,6 +27,13 @@ To add a benchmark you implement four things:
 Then lazy registration in the training and evaluation scripts makes it
 discoverable without importing optional dependencies at startup.
 
+If the target is a fixed set of instruction files evaluated by an existing
+local executable, start with the generic
+[`worker_bundle`](worker-bundle.md) adapter instead of writing a
+domain-specific benchmark. It loads pre-split YAML contracts, materializes a
+validated virtual bundle, and delegates answer/scoring behavior to the external
+runner.
+
 ---
 
 ## Step 1 — Create the package
