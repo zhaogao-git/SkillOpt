@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,16 @@ def _parse_bool(value: Any, *, label: str) -> bool:
     if normalized in {"0", "false", "no", "off", ""}:
         return False
     raise ValueError(f"{label} must be a boolean")
+
+
+def _normalize_yaml_value(value: Any) -> Any:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: _normalize_yaml_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_normalize_yaml_value(item) for item in value]
+    return value
 
 
 class WorkerBundleDataLoader(SplitDataLoader):
@@ -136,7 +147,7 @@ class WorkerBundleDataLoader(SplitDataLoader):
             for raw in raw_items:
                 if not isinstance(raw, dict):
                     raise ValueError(f"Worker bundle task entries must be mappings: {path}")
-                item = dict(raw)
+                item = _normalize_yaml_value(raw)
                 raw_task_id = item.get("id")
                 if raw_task_id is None:
                     raw_task_id = item.get("taskId")

@@ -177,6 +177,28 @@ def test_worker_bundle_dataloader_loads_pre_split_yaml(tmp_path: Path) -> None:
     assert loader.build_eval_batch(0, "test", 42).payload[0]["task_type"] == "support"
 
 
+def test_worker_bundle_dataloader_normalizes_yaml_dates_for_runner_json(
+    tmp_path: Path,
+) -> None:
+    split_dir = tmp_path / "splits"
+    _write_split(split_dir)
+    (split_dir / "train" / "tasks.yaml").write_text(
+        "taskId: train-1\n"
+        "prompt: Handle the train request.\n"
+        "reviewedDate: 2026-07-17\n",
+        encoding="utf-8",
+    )
+    loader = WorkerBundleDataLoader(
+        split_dir=str(split_dir),
+        split_mode="split_dir",
+    )
+
+    loader.setup({"split_mode": "split_dir", "split_dir": str(split_dir), "env": "worker_bundle"})
+
+    assert loader.train_items[0]["reviewedDate"] == "2026-07-17"
+    json.dumps(loader.train_items[0])
+
+
 def test_worker_bundle_dataloader_accepts_task_id_and_does_not_open_sealed_test(
     tmp_path: Path,
 ) -> None:
