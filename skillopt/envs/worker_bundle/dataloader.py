@@ -93,6 +93,7 @@ class WorkerBundleDataLoader(SplitDataLoader):
         if self.limit:
             items = items[: self.limit]
         for item in items:
+            item["_split"] = name
             task_id = str(item["id"])
             previous_split = self._loaded_ids.get(task_id)
             if previous_split is not None:

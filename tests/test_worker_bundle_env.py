@@ -196,6 +196,8 @@ def test_worker_bundle_dataloader_normalizes_yaml_dates_for_runner_json(
     loader.setup({"split_mode": "split_dir", "split_dir": str(split_dir), "env": "worker_bundle"})
 
     assert loader.train_items[0]["reviewedDate"] == "2026-07-17"
+    assert loader.train_items[0]["_split"] == "train"
+    assert loader.val_items[0]["_split"] == "val"
     json.dumps(loader.train_items[0])
 
 
